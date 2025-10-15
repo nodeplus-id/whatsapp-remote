@@ -8,7 +8,6 @@ import { useWsApiState } from '../uses/ws-api';
 import SessionStates from '../components/SessionStates.vue';
 import { watch } from 'vue';
 import { useStorage } from '../uses/storage';
-import { SessionState } from '@src/types';
 import Breadcrumbs from '../components/Breadcrumbs.vue';
 import type { BreadcrumbItem } from 'vuetify/lib/components/VBreadcrumbs/VBreadcrumbs.mjs';
 import ActiveWorkflowsIndicator from '../components/ActiveWorkflowsIndicator.vue';
@@ -34,7 +33,6 @@ const breadcrumbs: BreadcrumbItem[] = [
     {
         title: 'Session: ' + session.value?.name || '...',
     }
-
 ]
 
 watchEffect(() => {

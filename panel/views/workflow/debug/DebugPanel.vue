@@ -42,14 +42,14 @@
     </div>
 </template>
 <script setup lang="ts">
-import { computed, markRaw, onBeforeUnmount, onUnmounted, ref, shallowRef, watch, watchEffect, type ShallowRef } from 'vue'
+import { computed, markRaw, onBeforeUnmount, ref, shallowRef, watch, watchEffect, type ShallowRef } from 'vue'
 import type { SessionItem } from '../../../uses/sessions'
 import { WsState } from '../../../uses/ws-api'
 import WsIndicator from '../../../components/WsIndicator.vue'
 import { popup } from '../../../components/Popups.vue'
 import EventDataDialog from './EventDataDialog.vue'
 import { KernelDebug } from './KernelDebug'
-import { sampleMessageEvent, useStorage } from '../../../uses/storage'
+import { sampleMessageEvent } from '../../../uses/storage'
 import { SessionState } from '@src/types'
 import { useVueflowExtractor } from '../../../uses/vueflow-extractor'
 import KernelProcessList from './KernelProcessList.vue'
@@ -201,11 +201,9 @@ kernelDebug.on('execEnd', exec => {
     }
 })
 
-useStorage().then(() =>
-    kernelDebug.start()
-        .then(() => logUrl.value = kernelDebug.getLogUrl())
-        .catch(err => popup(err.message || err, 'error'))
-)
+kernelDebug.start()
+    .then(() => logUrl.value = kernelDebug.getLogUrl())
+    .catch(err => popup(err.message || err, 'error'))
 
 watchEffect(() => {
     localStorage.setItem(eventDataKey, eventData.value || '')

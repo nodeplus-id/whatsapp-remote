@@ -7,7 +7,6 @@ import SessionButtons from '../components/SessionControls.vue';
 import FlowEditor from './workflow/FlowEditor.vue';
 import { VOverlay, type VMain } from 'vuetify/components';
 import Actions from './workflow/ActionList.vue';
-import { useStorage } from '../uses/storage';
 import type { FlowExportObject } from '@vue-flow/core';
 import type { WorkflowData } from '../../src/types';
 import { popup } from '../components/Popups.vue';
@@ -22,9 +21,8 @@ const wsState = useWsApiState()
 
 async function loadSession() {
   const sessionId = parseInt(id)
-  const [sessions, _storage, data] = await Promise.all([
+  const [sessions, data] = await Promise.all([
     waitSessions(),
-    useStorage(), // load static action lists
     fetch(`/workflow/${id}`).then<WorkflowData>(r => r.json())
   ])
 

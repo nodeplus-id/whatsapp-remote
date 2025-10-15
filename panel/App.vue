@@ -1,5 +1,9 @@
 <script setup lang="ts">
 import Popups from './components/Popups.vue'
+import { useStorage } from './uses/storage';
+
+// Load default config and other data into storage in early run
+useStorage()
 
 </script>
 
