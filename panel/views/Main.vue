@@ -38,15 +38,14 @@ function onCreate() {
                             Create Session
                         </v-btn>
                     </v-toolbar>
-                    <v-card>
 
-                        <v-list lines="two">
+                    <v-card>
+                        <v-list lines="two" v-if="sessions.size">
                             <v-list-item v-for="[id, item] in sessions" :key="id"
                                 :to="{ name: 'session', params: { id } }">
                                 <template v-slot:prepend>
                                     <v-avatar color="grey-lighten-1">
-                                        <v-img v-if="item.account?.image"
-                                            :src="item.account.image"></v-img>
+                                        <v-img v-if="item.account?.image" :src="item.account.image"></v-img>
                                         <v-icon v-else icon="person" />
                                     </v-avatar>
                                 </template>
@@ -75,6 +74,11 @@ function onCreate() {
                                 </template>
                             </v-list-item>
                         </v-list>
+                        <v-card-text class="text-center" v-else>
+                            There's no session, lets <v-btn variant="outlined" density="compact" color="primary" text
+                                @click="onCreate">create
+                                one</v-btn>
+                        </v-card-text>
                     </v-card>
                 </v-col>
             </v-row>

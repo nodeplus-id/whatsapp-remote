@@ -2,27 +2,26 @@
     <VDialog v-model="dialog" max-width="800" scrollable @after-leave="currentCfg = null">
         <VCard :loading="!mergedCfg" :title="mergedCfg?.name">
             <VCardText>
+                <VRow class="mb-2">
+                    <VCol>
+                        <v-text-field variant="plain" class="mb-1" hide-details :model-value="currentCfg?.id" label="ID"
+                            type="number" readonly />
+                        <v-text-field variant="plain" class="mb-1" hide-details :model-value="currentCfg?.dataDir"
+                            label="Data Directory" readonly />
+                        <v-text-field variant="plain" class="mb-1" hide-details
+                            :model-value="currentCfg?.lastWaWebVersion || '&mdash;'" label="WaWeb Version" readonly />
+                    </VCol>
+                    <VCol v-if="currentCfg?.account">
+                        <v-text-field variant="plain" class="mb-1" hide-details :model-value="currentCfg?.account?.user"
+                            label="WA Account ID" readonly />
+                        <v-text-field variant="plain" class="mb-1" hide-details :model-value="currentCfg?.account?.name"
+                            label="WA Account Name" readonly />
+                        <v-text-field variant="plain" class="mb-1" hide-details
+                            :model-value="`${currentCfg?.account?.platform} (${currentCfg?.account?.device})`"
+                            label="WAWeb Platform (Device)" readonly />
+                    </VCol>
+                </VRow>
                 <v-form v-model="valid" @submit.prevent="submit" v-if="mergedCfg">
-                    <VRow>
-                        <VCol>
-                            <v-text-field variant="solo" density="comfortable" hide-details
-                                :model-value="currentCfg?.id" label="ID" type="number" readonly />
-                            <v-text-field variant="solo" density="comfortable" hide-details
-                                :model-value="currentCfg?.dataDir" label="Data Directory" readonly />
-                            <v-text-field variant="solo" density="comfortable" hide-details
-                                :model-value="currentCfg?.lastWaWebVersion || '&mdash;'" label="WaWeb Version"
-                                readonly />
-                        </VCol>
-                        <VCol v-if="currentCfg?.account">
-                            <v-text-field variant="solo" density="comfortable" hide-details
-                                :model-value="currentCfg?.account?.wid" label="WA Account ID" readonly />
-                            <v-text-field variant="solo" density="comfortable" hide-details
-                                :model-value="currentCfg?.account?.name" label="WA Account Name" readonly />
-                            <v-text-field variant="solo" density="comfortable" hide-details
-                                :model-value="currentCfg?.account?.phone" label="WA Phone Number" readonly />
-                        </VCol>
-                    </VRow>
-                    <VDivider class="mb-2" />
                     <!-- <v-select :value="currentCfg?.browser" label="Browser" :items="supportedBrowsers" readonly /> -->
                     <v-text-field v-model="mergedCfg.name" @update:modelValue="v => change('name', v)" label="Name"
                         required />
