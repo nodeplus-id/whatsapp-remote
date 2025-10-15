@@ -1,7 +1,6 @@
 import { createApp } from 'vue'
 import { createRouter, createWebHistory } from 'vue-router'
 import vuetify from './plugins/vuetify'
-import './assets/main.css'
 import App from './App.vue'
 import Main from './views/Main.vue'
 import Session from './views/Session.vue'
