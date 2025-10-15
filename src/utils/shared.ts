@@ -21,16 +21,19 @@ export function slugify(text: string) {
 
 export function vueflowToWorkflowConfig(data: Pick<FlowExportObject, 'nodes' | 'edges'>): WorkerConfig {
 
+    if (!data) return {}
+
     const nodes: WorkerConfig['nodes'] = {}
     const chains: WorkerConfig['chains'] = []
 
-    data.nodes.forEach((node: Node<ActionNodeData>) => {
+    data.nodes?.forEach((node: Node<ActionNodeData>) => {
         nodes[node.id] = {
             actionId: node.data?.id,
             config: node.data?.config
         }
     })
-    data.edges.forEach((edge) => {
+
+    data.edges?.forEach((edge) => {
         chains.push(`${edge.source}:${edge.sourceHandle}>${edge.target}:${edge.targetHandle}`)
     })
 

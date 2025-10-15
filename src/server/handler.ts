@@ -11,7 +11,8 @@ import { MANAGER } from "../remote/manager"
 WS.onNewClient.push((ws) => {
     ws.sendData(MANAGER.getDbAndStates())
 })
-// HTTP request handler
+
+// GET Backend loaded config
 APP.get('/cfg', (_req, res) => {
     res.json(config)
 })
@@ -32,10 +33,6 @@ APP.get('/workflow/:id', (req, res) => {
     const id = parseInt(req.params.id)
     res.json(MANAGER.getWorkflowData(id) || {})
 })
-/* @deprecated (Unused) Get runner information */
-// APP.get('/runner', async (req, res) => {
-//     res.json(MANAGER.getRunner())
-// })
 
 APP.get('/worker/:sessionId', async (req, res) => {
     const sessionId = parseInt(req.params.sessionId)
@@ -44,6 +41,11 @@ APP.get('/worker/:sessionId', async (req, res) => {
 APP.get('/worker-debug/:sessionId', async (req, res) => {
     const sessionId = parseInt(req.params.sessionId)
     res.json(await MANAGER.getOrCreateWorkerDebugger(sessionId))
+})
+
+APP.get('/session/:id/merged-config', json(), async (req, res) => {
+    const id = parseInt(req.params.id)
+    res.json(await MANAGER.getSessionMergedConfig(id))
 })
 
 APP.patch('/session/:id', json(), async (req, res) => {

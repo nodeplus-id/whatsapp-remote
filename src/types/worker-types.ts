@@ -94,11 +94,11 @@ export type NodeChains = Map<string/* nodeId */, NodeChain>
 // export type NodeLayers = NodeChain[][]
 export interface WorkerConfig {
     // session: SessionConfig
-    nodes: Nodes
+    nodes?: Nodes
     /**
      * Chain format: nodeId:handle>nodeId:handle
      */
-    chains: Array<string>
+    chains?: Array<string>
 }
 
 export type Execution<T extends ConfigOptions = ConfigOptions> = {

@@ -201,6 +201,12 @@ export class Manager {
         return ses.config
     }
 
+    getSessionMergedConfig(id: number) {
+        const ses = this.sessions.get(id)
+        if (!ses) return
+        return ses.getMergedConfig()
+    }
+
     /** Create a new Whatsapp Web session */
     create() {
         const item = this.db.createSession()

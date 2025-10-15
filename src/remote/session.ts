@@ -4,11 +4,25 @@ import { injectRemote, injectVersionLock } from "../utils/browser"
 import { SOCKET_STATE, SOCKET_STREAM } from "../waweb/WAWebSocketConstants"
 import { WsClient } from "../server/websocket"
 import { RawData } from "ws"
-import type { MsgPayload } from "../types/apps-types"
 import defaultConfig from "../config"
 import { WS } from "../server/listeners"
 import { MANAGER } from "./manager"
 import { slugify, vueflowToWorkflowConfig } from "../utils/shared"
+
+const sessionDefaultConfig: Omit<SessionConfig, 'id' | 'name' | 'dataDir'> = {
+    executablePath: defaultConfig.browserExe ?? undefined,
+    userAgent: defaultConfig.defaultUserAgent,
+    headless: defaultConfig.defaultBrowserHeadless,
+    args: defaultConfig.defaultBrowserArgs,
+    screencastFullFps: defaultConfig.screencastFullFps,
+    screencastQuality: defaultConfig.screencastQuality,
+    screencastFormat: defaultConfig.screencastFormat,
+    debugWAEvents: defaultConfig.debugWAEvents,
+    devtools: false,
+    disableVersionLock: false,
+    autoStart: false,
+    workflowEnabled: defaultConfig.defaultWorkflowEnabled,
+}
 
 /**
  * WhatsApp Session
@@ -164,6 +178,14 @@ export default class Session {
         this.screenShares.forEach((ws) => this.screenShareStop(ws))
     }
 
+    /** Merged config with default value */
+    getMergedConfig(): SessionConfig {
+        return {
+            ...sessionDefaultConfig,
+            ...this.config
+        }
+    }
+
     async start() {
 
         if (!this.config.executablePath && !defaultConfig.browserExe) {
@@ -174,25 +196,26 @@ export default class Session {
 
         let workerUrl: string | undefined = undefined
 
-        if (this.config.workflowEnabled) {
-            const workerName = slugify(this.config.name)
-            const wfData = MANAGER.getWorkflowData(this.config.id)
-            if (!!wfData?.flow) {
-                const workerConfig = vueflowToWorkflowConfig(wfData.flow)
-                const ret = await MANAGER.getOrCreateWorker(this.config.id, workerName, workerConfig)
-                workerUrl = ret.url
-            } else {
-                console.debug(`${this.config.name}: No Workflow defined`)
-            }
+        const mergedConfig = this.getMergedConfig()
+
+        if (mergedConfig.workflowEnabled) {
+            const workerName = slugify(mergedConfig.name)
+            const wfData = MANAGER.getWorkflowData(mergedConfig.id)
+            // Always start the worker even no Workflow data defined
+            const workerConfig = vueflowToWorkflowConfig(wfData?.flow)
+            const ret = await MANAGER.getOrCreateWorker(mergedConfig.id, workerName, workerConfig)
+            workerUrl = ret.url
+        } else {
+            console.debug(`workflow not enabled for ${mergedConfig.name}`)
         }
 
         const browser = await pc.launch({
-            headless: this.config.headless ?? defaultConfig.defaultBrowserHeadless,
-            executablePath: this.config.executablePath ?? defaultConfig.browserExe,
-            browser: this.config.browser ?? 'chrome',
-            userDataDir: this.config.dataDir,
-            args: this.config.args ?? defaultConfig.defaultBrowserArgs,
-            devtools: this.config.devtools ?? defaultConfig.showBrowser,
+            headless: mergedConfig.headless,
+            executablePath: mergedConfig.executablePath,
+            browser: mergedConfig.browser,
+            userDataDir: mergedConfig.dataDir,
+            args: mergedConfig.args,
+            devtools: mergedConfig.devtools,
             defaultViewport: null,
             waitForInitialPage: false,
             timeout: 2 * 60e3
@@ -201,7 +224,7 @@ export default class Session {
         // const [page] = await browser.pages()
 
         // Whatsapp will not loaded in Headless User Agent
-        await page.setUserAgent(this.config.userAgent ?? defaultConfig.defaultUserAgent)
+        await page.setUserAgent(mergedConfig.userAgent ?? defaultConfig.defaultUserAgent)
 
         this.browser = browser
         this.page = page
@@ -210,9 +233,9 @@ export default class Session {
         // Expose function that can be called inside wa web browser
         await page.exposeFunction('_wa_state_', this.setWaState)
         // await page.exposeFunction('_msg_', this.newWaMsg)
-        if (!this.config.devtools) {
+        if (!mergedConfig.devtools) {
             await page.on('console', (msg: ConsoleMessage) => {
-                console[msg.type()](`${this.config.name}: ${msg.text()}`)
+                console[msg.type()](`${mergedConfig.name}: ${msg.text()}`)
             })
         }
 
@@ -221,7 +244,7 @@ export default class Session {
             window['REMOTE'] = REMOTE
         }, { config: this.config, workerUrl });
 
-        if (!this.config.disableVersionLock) {
+        if (!mergedConfig.disableVersionLock) {
             await injectVersionLock(this.page)
         }
 

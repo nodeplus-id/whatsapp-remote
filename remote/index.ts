@@ -68,8 +68,10 @@ try {
             return window['exports'] = exports
         }),
         new Promise((r, j) => {
-            if (!REMOTE.workerUrl)
+            if (!REMOTE.workerUrl){
+                console.debug(`No worker Url defined.`)
                 return r(null)
+            }
 
             console.debug(`Connecting to worker ${REMOTE.workerUrl}`)
             const ws = new RemoteWs(REMOTE.workerUrl)

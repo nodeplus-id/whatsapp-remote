@@ -124,6 +124,9 @@ export class Kernel {
         let nodeChain: NodeChain
         let action: ActionOptionItem
 
+        if (!this.config.nodes || typeof this.config.nodes != 'object')
+            return
+
         for (const [nodeId, node] of Object.entries(this.config.nodes)) {
             action = this.options.get(node.actionId)
             if (!action) {

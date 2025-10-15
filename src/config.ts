@@ -1,6 +1,7 @@
 import path from "node:path"
 import { homedir } from "node:os"
 import { getBrowserPath } from "./utils/browser"
+import type { SessionConfig } from "./types"
 
 const isLiveDev = process.env.NODE_ENV == 'development' || ['dev', 'test'].includes(process.env.npm_lifecycle_event)
 const showBrowser = !!process.env.SHOW_BROWSER
@@ -50,4 +51,5 @@ export const config = {
     debugWAEvents: false,
     defaultWorkflowEnabled: true
 }
+
 export default config

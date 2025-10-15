@@ -15,6 +15,9 @@ export function* SequentialId() {
 }
 
 export function mergeConfig(source: Record<string, any>, target: Record<string, any>) {
+
+    if (!source) return // nothing to merge
+
     for (const key in source) {
         if (dangerousKeys.includes(key)) continue;
         if (
@@ -36,42 +39,46 @@ export function updateChains(config: WorkerConfig) {
     const nodeChains = new Map<string/* nodeId */, NodeChain>()
 
     //Create all chains
-    for (const nodeId in config.nodes) {
-        nodeChains.set(nodeId, { id: nodeId })
+    if (config.nodes && typeof config.nodes == 'object') {
+        for (const nodeId in config.nodes) {
+            nodeChains.set(nodeId, { id: nodeId })
+        }
     }
 
-    // Chain format: nodeId:handle>nodeId:handle
-    for (const chainId of config.chains) {
-        const [source, target] = chainId.split('>')
-        const [sourceNodeId, sourceHandle] = source.split(':')
-        const [targetNodeId, targetHandle] = target.split(':')
-        if (!nodeChains.has(sourceNodeId)) {
-            console.warn(`Missing nodeId ${sourceNodeId} on chain ${chainId}`)
-            continue
+    if (Array.isArray(config.chains)) {
+        // Chain format: nodeId:handle>nodeId:handle
+        for (const chainId of config.chains) {
+            const [source, target] = chainId.split('>')
+            const [sourceNodeId, sourceHandle] = source.split(':')
+            const [targetNodeId, targetHandle] = target.split(':')
+            if (!nodeChains.has(sourceNodeId)) {
+                console.warn(`Missing nodeId ${sourceNodeId} on chain ${chainId}`)
+                continue
+            }
+            if (!nodeChains.has(targetNodeId)) {
+                console.warn(`Missing nodeId ${targetNodeId} on chain ${chainId}`)
+                continue
+            }
+            let sourceChain = nodeChains.get(sourceNodeId)
+            let targetChain = nodeChains.get(targetNodeId)
+
+            if (!sourceChain.next)
+                sourceChain.next = new Map()
+
+            if (!targetChain.prev) {
+                targetChain.prev = new Map()
+                targetChain.prevMaxStack = 1
+            }
+
+            if (!sourceChain.next.has(sourceHandle))
+                sourceChain.next.set(sourceHandle, [])
+
+            if (!targetChain.prev.has(targetHandle))
+                targetChain.prev.set(targetHandle, [])
+
+            sourceChain.next.get(sourceHandle).push([targetChain, targetHandle, chainId])
+            targetChain.prev.get(targetHandle).push([sourceChain, sourceHandle, chainId])
         }
-        if (!nodeChains.has(targetNodeId)) {
-            console.warn(`Missing nodeId ${targetNodeId} on chain ${chainId}`)
-            continue
-        }
-        let sourceChain = nodeChains.get(sourceNodeId)
-        let targetChain = nodeChains.get(targetNodeId)
-
-        if (!sourceChain.next)
-            sourceChain.next = new Map()
-
-        if (!targetChain.prev) {
-            targetChain.prev = new Map()
-            targetChain.prevMaxStack = 1
-        }
-
-        if (!sourceChain.next.has(sourceHandle))
-            sourceChain.next.set(sourceHandle, [])
-
-        if (!targetChain.prev.has(targetHandle))
-            targetChain.prev.set(targetHandle, [])
-
-        sourceChain.next.get(sourceHandle).push([targetChain, targetHandle, chainId])
-        targetChain.prev.get(targetHandle).push([sourceChain, sourceHandle, chainId])
     }
 
     // Calculate highest stacked-input

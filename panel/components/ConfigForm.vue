@@ -81,9 +81,8 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, shallowRef } from 'vue'
+import { ref } from 'vue'
 import type { SessionConfig } from '../../src/types';
-import { Storage } from '../uses/storage';
 
 const mergedCfg = ref<Partial<SessionConfig> | null>(null)
 let currentCfg = ref<SessionConfig | null>(null)
@@ -100,25 +99,12 @@ function change(l: string, v: any) {
 function show(config: SessionConfig) {
     changes = {}
     currentCfg.value = config
-    // Note: Storage must be already loaded in parent with `useStorage`
-    const { defaultConfig } = Storage
-    mergedCfg.value = {
-        name: config.name,
-        executablePath: config.executablePath ?? defaultConfig?.browserExe ?? undefined,
-        userAgent: config.userAgent ?? defaultConfig?.defaultUserAgent,
-        headless: config.headless ?? defaultConfig?.defaultBrowserHeadless,
-        args: config.args ?? defaultConfig?.defaultBrowserArgs,
-        screencastFullFps: config.screencastFullFps ?? defaultConfig?.screencastFullFps,
-        screencastQuality: config.screencastQuality ?? defaultConfig?.screencastQuality,
-        screencastFormat: config.screencastFormat ?? defaultConfig?.screencastFormat,
-        debugWAEvents: config.debugWAEvents ?? defaultConfig?.debugWAEvents,
-        devtools: config.devtools ?? false,
-        disableVersionLock: config.disableVersionLock ?? false,
-        autoStart: config.autoStart ?? false,
-        workflowEnabled: config.workflowEnabled ?? defaultConfig?.defaultWorkflowEnabled
-    }
-
-    dialog.value = true
+    fetch(`/session/${config.id}/merged-config`)
+        .then(r => r.json())
+        .then(json => {
+            mergedCfg.value = json
+            dialog.value = true
+        })
 }
 
 defineExpose({ show })
