@@ -12,6 +12,7 @@
     "build",
   ],
   "compilerOptions": {
+    "module": "preserve",
     "paths": {
       "@*-types": [
         "./src/types/*-types"

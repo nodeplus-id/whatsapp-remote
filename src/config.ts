@@ -1,7 +1,7 @@
 import path from "node:path"
 import { homedir } from "node:os"
-import { getBrowserPath } from "./utils/browser"
-import type { SessionConfig } from "./types"
+import { threadId } from "worker_threads"
+import { getPackageJson, getBrowserPath } from "./utils/helper"
 
 const isLiveDev = process.env.NODE_ENV == 'development' || ['dev', 'test'].includes(process.env.npm_lifecycle_event)
 const showBrowser = !!process.env.SHOW_BROWSER
@@ -29,13 +29,12 @@ if (typeof process.env.DATA_DIR == 'string') {
     dataDir = path.join(homedir(), ".local", "share", process.env.APP_NAME || 'whatsapp-remote');
 }
 
-const listenPort = 8080
+const listenPort = parseInt(process.env.LISTEN_PORT || '8080') || 8080
 const browserExe = process.env.IS_RUNNER ? '' : await getBrowserPath()
-
-// console.debug(`[CONFIG.${process.pid}] Browser path`, browserExe)
+const packageJson = await getPackageJson()
 
 export const config = {
-    version: '1.0.0',
+    version: packageJson.version || '0.0.0',
     dataDir,
     workerLogsDir: path.resolve(dataDir, 'worker-logs'),
     listenPort,
@@ -51,5 +50,5 @@ export const config = {
     debugWAEvents: false,
     defaultWorkflowEnabled: true
 }
-
+console.info(`${process.pid}:${threadId} Config loading ${packageJson.name || '??'} v${config.version}`)
 export default config

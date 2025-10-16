@@ -1,6 +1,6 @@
 {
   "name": "whatsapp-remote",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "main": "index.js",
   "scripts": {
     "mount": "mount | grep $PWD/build || sudo mount -t tmpfs tmpfs ./build",
