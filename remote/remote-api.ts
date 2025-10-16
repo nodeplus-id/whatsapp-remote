@@ -12,13 +12,22 @@ export class RemoteApi {
     }
 
     async chatFocus(chatId: string, noRead = false) {
+
+        // console.debug('getChatById', chatId)
         let chat = this.getChatById(chatId)
-        if (!chat) return
-        const ok = await Cmd.openChatFromUnread(chat, undefined)
+        if (!chat) {
+            return
+        }
 
-        if (!ok) return
+        // console.debug('openChatFromUnread', chatId)
+        const ok = await Cmd.openChatBottom(chat, undefined)
 
+        if (!ok) {
+            return
+        }
+        // console.debug('focus', chatId)
         require("WAWebComposeBoxActions").ComposeBoxActions.focus(chat)
+        // console.debug('scrollToActiveChat', chatId)
         Cmd.scrollToActiveChat()
         if (!noRead) {
             Cmd.markChatUnread(chat, false)
@@ -28,8 +37,11 @@ export class RemoteApi {
 
     async sendText(chatId: string, msg: string) {
         const chat = await this.chatFocus(chatId)
-        if (!chat) return false
-
+        if (!chat) {
+            // console.debug(`Focus chat failed`, chatId)
+            return
+        }
+        // console.debug(`sendText`, chatId)
         await delay(200)
         require("WAWebComposeBoxActions").ComposeBoxActions.paste(chat, msg)
         await delay(200)
